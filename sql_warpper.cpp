@@ -20,7 +20,7 @@ int main(void)
 	// 待搜索的字段信息
 	std::tuple<std::string, std::string, std::string> tuple_("id_", "name_", "password_");
 	std::vector<std::tuple<integer_type, std::string, std::string>> user_content_;
-	ret_ = sql_.select<std::tuple<integer_type, std::string, std::string>, std::tuple<std::string, std::string, std::string>,
+	ret_ = sql_.select<std::tuple<std::string, std::string, std::string>,
 		integer_type, std::string, std::string>("SELECT * FROM user_information", user_content_, tuple_);
 
 	std::cout << "content:" << std::endl;
