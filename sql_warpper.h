@@ -39,8 +39,8 @@ public:
 	// ¸üĞÂ 
 	bool update(const std::string & command) { return invoke(command); }
 	// ²éÑ¯
-	template <typename __dest_type, typename __set, typename __type, typename ... params>
-	bool select(const std::string & command, std::vector<__dest_type> & dest, __set parm)
+	template <typename __set, typename __type, typename ... params>
+	bool select(const std::string & command, std::vector<std::tuple<__type, params...>> & dest, __set parm)
 	{
 		try {
 			/* Select in ascending order */
@@ -51,7 +51,7 @@ public:
 			res_->afterLast();
 			while (res_->previous())
 			{
-				separation<__dest_type, sql::ResultSet, __set, __type, params...>(dest, res_, parm);
+				separation<std::tuple<__type, params...>, sql::ResultSet, __set, __type, params...>(dest, res_, parm);
 			}
 			delete res_;
 			delete pstmt_;
