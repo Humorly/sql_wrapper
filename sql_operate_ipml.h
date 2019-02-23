@@ -82,5 +82,15 @@ protected:
 		}
 	};
 
+	// double
+	template<typename __dest_type, typename __parm>
+	struct get_value_type<double, __dest_type, __parm>
+	{
+		inline static auto get_value(__dest_type * val, __parm parm) -> decltype(val->getDouble(parm))
+		{
+			return val->getDouble(parm);
+		}
+	};
+
 };
 
