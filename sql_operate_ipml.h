@@ -29,7 +29,7 @@ protected:
 		return dest;
 	}
 
-	// Õ¹¿ª²ÎÊı
+	// å±•å¼€å‚æ•°
 	template<integer_type N, integer_type M>
 	struct get_class
 	{
@@ -37,25 +37,25 @@ protected:
 		inline static void get(__dest & dest, __src * src, __set parm)
 		{
 			constexpr integer_type index_ = N + 1;
-			// ¸³ÖµÔªËØN²¢µİ¹éÕ¹¿ª
+			// èµ‹å€¼å…ƒç´ Nå¹¶é€’å½’å±•å¼€
 			std::get<N>(dest) = get_value_type<T, __src, const char *>::template get_value(src, std::get<N>(parm).c_str());
 			get_class<index_, M>::template get<__dest, __src, __set, params...>(dest, src, parm);
 		}
 	};
 
-	// µİ¹éµ½Ä©ÔªËØ
+	// é€’å½’åˆ°æœ«å…ƒç´ 
 	template<integer_type M>
 	struct get_class<M, M>
 	{
 		template <typename __dest, typename __src, typename __set, typename T>
 		inline static void get(__dest & dest, __src * src, __set parm)
 		{
-			// Ä©ÔªËØ¸³Öµ
+			// æœ«å…ƒç´ èµ‹å€¼
 			std::get<M>(dest) = get_value_type<T, __src, const char *>::template get_value(src, std::get<M>(parm).c_str());
 		}
 	};
 
-	// »ñÈ¡²ÎÊı
+	// è·å–å‚æ•°
 	template<typename __value_type, typename __dest_type, typename __parm>
 	struct get_value_type
 	{
@@ -92,5 +92,14 @@ protected:
 		}
 	};
 
+	// int
+	template<typename __dest_type, typename __parm>
+	struct get_value_type<int, __dest_type, __parm>
+	{
+		inline static auto get_value(__dest_type* val, __parm parm) -> decltype(val->getInt(parm))
+		{
+			return val->getInt(parm);
+		}
+	};
 };
 
