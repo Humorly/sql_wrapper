@@ -14,14 +14,23 @@ public:
 		const std::string & pwd, const std::string & db) 
 		: host_(host), user_(user), pwd_(pwd), db_(db)
 	{
-		// 创建连接
-		driver_ = get_driver_instance();
-		// 连接数据库
-		con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
-		// 指向指定路径
-		con_->setSchema(db_.c_str());
-
-		stmt_ = con_->createStatement();
+		try
+		{
+			// 创建连接
+			driver_ = get_driver_instance();
+			// 连接数据库
+			con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
+			// 指向指定路径
+			con_->setSchema(db_.c_str());
+			// 创建执行器
+			stmt_ = con_->createStatement();
+		}
+		catch (sql::SQLException & e)
+		{
+			std::string str_logger_("sql error is "
+				+ std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
+			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
+		}
 	}
 
 	virtual ~sql_warpper() 
@@ -55,8 +64,9 @@ public:
 			delete res_;
 			delete pstmt_;
 		}
-		catch (sql::SQLException &e) {
-			std::string str_logger_("sql error by create select -> code is " + 
+		catch (sql::SQLException &e) 
+		{
+			std::string str_logger_("sql error by select command -> code is " + 
 				std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
 			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
 			return false;
@@ -70,11 +80,12 @@ private:
 	{
 		try 
 		{
-			stmt_->execute(command.c_str());
+			if (nullptr != stmt_)
+				stmt_->execute(command.c_str());
 		}
 		catch (sql::SQLException &e) 
 		{
-			std::string str_logger_("sql error by update command -> code is "
+			std::string str_logger_("sql error by execute command -> code is "
 				+ std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
 			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
 			return false;
