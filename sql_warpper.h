@@ -14,11 +14,11 @@ public:
 		const std::string & pwd, const std::string & db) 
 		: host_(host), user_(user), pwd_(pwd), db_(db)
 	{
-		/* Create a connection */
+		// åˆ›å»ºè¿žæŽ¥
 		driver_ = get_driver_instance();
-		//con_ = driver_->connect("tcp://127.0.0.1:3306", "root", "407043");
+		// è¿žæŽ¥æ•°æ®åº“
 		con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
-		/* Connect to the MySQL test database */
+		// æŒ‡å‘æŒ‡å®šè·¯å¾„
 		con_->setSchema(db_.c_str());
 
 		stmt_ = con_->createStatement();
@@ -30,24 +30,23 @@ public:
 		delete con_;
 	}
 
-	// ´´½¨
+	// åˆ›å»º
 	bool create(const std::string & command) { return invoke(command); }
-	// Ôö¼Ó
+	// å¢žåŠ 
 	bool insert(const std::string & command) { return invoke(command); }
-	// É¾³ý
+	// åˆ é™¤
 	bool remove(const std::string & command) { return invoke(command); }
-	// ¸üÐÂ 
+	// æ›´æ–° 
 	bool update(const std::string & command) { return invoke(command); }
-	// ²éÑ¯
+	// æŸ¥è¯¢
 	template <typename __set, typename __type, typename ... params>
 	bool select(const std::string & command, std::vector<std::tuple<__type, params...>> & dest, __set parm)
 	{
-		try {
-			/* Select in ascending order */
+		try 
+		{
 			pstmt_ = con_->prepareStatement(command.c_str());
 			res_ = pstmt_->executeQuery();
 
-			/* Fetch in reverse = descending order! */
 			res_->afterLast();
 			while (res_->previous())
 			{
@@ -66,14 +65,15 @@ public:
 	}
 
 private:
-	// Ö´ÐÐÃüÁî
+	// æ‰§è¡Œå‘½ä»¤
 	bool invoke(const std::string & command)
 	{
-		try {
-			//stmt_->execute("DROP TABLE IF EXISTS test");
+		try 
+		{
 			stmt_->execute(command.c_str());
 		}
-		catch (sql::SQLException &e) {
+		catch (sql::SQLException &e) 
+		{
 			std::string str_logger_("sql error by update command -> code is "
 				+ std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
 			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
