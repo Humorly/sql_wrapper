@@ -35,6 +35,9 @@ public:
 
 	virtual ~sql_warpper() 
 	{
+		stmt_->close();
+		con_->close();
+
 		delete stmt_;
 		delete con_;
 	}
