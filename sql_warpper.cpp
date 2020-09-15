@@ -8,7 +8,7 @@ int main(void)
 {
 	std::cout << "start sql operate..." << std::endl;
 
-	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "407043", "game");
+	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "123456", "game");
 	bool ret_ = false;
 	ret_ = sql_.create("create table test (id_ double, name_ varchar(64), password_ varchar(64)); ");
 	ret_ = sql_.insert("insert into test values(5.12056683, \"humorly\", \"chen123\");");
