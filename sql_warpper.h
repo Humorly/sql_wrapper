@@ -17,7 +17,7 @@ public:
 	{
 		/* Create a connection */
 		driver_ = get_driver_instance();
-		//con_ = driver_->connect("tcp://127.0.0.1:3306", "root", "407043");
+		//con_ = driver_->connect("tcp://127.0.0.1:3306", "root", "123456");
 		con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
 		/* Connect to the MySQL test database */
 		con_->setSchema(db_.c_str());
@@ -34,40 +34,40 @@ public:
 		delete con_;
 	}
 
-	// ´´½¨
+	// åˆ›å»º
 	bool create(const std::string & command) { return invoke(command); }
-	// Ôö¼Ó
+	// å¢åŠ 
 	bool insert(const std::string & command) { return invoke(command); }
-	// É¾³ı
+	// åˆ é™¤
 	bool remove(const std::string & command) { return invoke(command); }
 
-	// É¾³ı
+	// åˆ é™¤
 	template <typename __type, typename ... params>
 	bool remove(const std::string& command, std::tuple<__type, params...> val)
 	{
 		return __invoke_template(command, val);
 	}
 
-	// ¸üĞÂ 
+	// æ›´æ–° 
 	bool update(const std::string & command) { return invoke(command); }
-	// Ö´ĞĞ
+	// æ‰§è¡Œ
 	bool execute(const std::string & command) { return invoke(command); }
 
-	// Ôö¼Ó ¡ª> insertÃüÁîÓÉcommandÖ¸³ö
+	// å¢åŠ  â€”> insertå‘½ä»¤ç”±commandæŒ‡å‡º
 	template <typename __type, typename ... params>
 	bool insert(const std::string& command, std::tuple<__type, params...> val)
 	{
 		return __invoke_template(command, val);
 	}
 
-	// Ôö¼Ó ¡ª> ±íÃûÓÉ²ÎÊıtable_nameÖ¸³ö
+	// å¢åŠ  â€”> è¡¨åç”±å‚æ•°table_nameæŒ‡å‡º
 	template <typename __set, typename __type, typename ... params>
 	bool insert(const std::string& table_name, __set src, std::tuple<__type, params...> val)
 	{
-		// ºÏ³ÉÇ°×º
+		// åˆæˆå‰ç¼€
 		std::string command_ = "insert into " + table_name + " (";
 
-		// ºÏ³É×Ö¶Î
+		// åˆæˆå­—æ®µ
 		std::vector<std::string> parameter_;
 		parameter_ = expand<0>(src);
 
@@ -90,15 +90,15 @@ public:
 		return __invoke_template(command_, val);
 	}
 
-	// Ôö¼Ó ¡ª> ±íÃûÔÚsrcÖĞµÄµÚÒ»¸ö²ÎÊı
+	// å¢åŠ  â€”> è¡¨ååœ¨srcä¸­çš„ç¬¬ä¸€ä¸ªå‚æ•°
 	template <typename __table_type, typename ... params, typename __type>
 	bool insert(std::tuple<__table_type, params...> src, __type val)
 	{
-		// ºÏ³ÉÇ°×º
+		// åˆæˆå‰ç¼€
 		std::string command_ = "insert into " + std::get<0>(src) + " (";
 
-		// ºÏ³É×Ö¶Î
-		// ºÏ³É×Ö¶Î
+		// åˆæˆå­—æ®µ
+		// åˆæˆå­—æ®µ
 		std::vector<std::string> parameter_;
 		parameter_ = expand<1>(src);
 
@@ -121,21 +121,21 @@ public:
 		return __invoke_template(command_, val);
 	}
 
-	// ¸üĞÂ ¡ª> updateÃüÁîÓÉcommandÖ¸³ö
+	// æ›´æ–° â€”> updateå‘½ä»¤ç”±commandæŒ‡å‡º
 	template <typename __type, typename ... params>
 	bool update(const std::string& command, std::tuple<__type, params...> val)
 	{
 		return __invoke_template(command, val);
 	}
 
-	// ¸üĞÂ 
+	// æ›´æ–° 
 	template <typename __set, typename __type, typename ... params>
 	bool update(const std::string& table_name, __set src, std::tuple<__type, params...> val)
 	{
-		// ºÏ³ÉÇ°×º
+		// åˆæˆå‰ç¼€
 		std::string command_ = "update " + table_name + " set ";
 
-		// ºÏ³É×Ö¶Î
+		// åˆæˆå­—æ®µ
 		std::vector<std::string> parameter_;
 		parameter_ = expand<0>(src);
 
@@ -150,14 +150,14 @@ public:
 		return __invoke_template(command_, val);
 	}
 
-	// ¸üĞÂ
+	// æ›´æ–°
 	template <typename __table_type, typename ... params, typename __type>
 	bool update(std::tuple<__table_type, params...> src, __type val)
 	{
-		// ºÏ³ÉÇ°×º
+		// åˆæˆå‰ç¼€
 		std::string command_ = "update " + std::get<0>(src) + " set ";
 
-		// ºÏ³É×Ö¶Î
+		// åˆæˆå­—æ®µ
 		std::vector<std::string> parameter_;
 		parameter_ = expand<1>(src);
 
@@ -172,21 +172,21 @@ public:
 		return __invoke_template(command_, val);
 	}
 
-	// ²éÑ¯
+	// æŸ¥è¯¢
 	template <typename __holder_type, typename __set, typename __type, typename ... params>
 	bool select(const std::string & command, 
 		__holder_type holder, __set parm, 
 		std::vector<std::tuple<__type, params...>> & dest)
 	{
 		try {
-			// ¹¹½¨ÃüÁî
+			// æ„å»ºå‘½ä»¤
 			pstmt_ = con_->prepareStatement(command);
-			// ºÏ³É²ÎÊı
+			// åˆæˆå‚æ•°
 			synthesis(pstmt_, holder);
 
-			// Ö´ĞĞ²éÑ¯
+			// æ‰§è¡ŒæŸ¥è¯¢
 			res_ = pstmt_->executeQuery();
-			// ·´ÏòÌáÈ¡
+			// åå‘æå–
 			res_->afterLast();
 			while (res_->previous())
 			{
@@ -205,7 +205,7 @@ public:
 	}
 
 private:
-	// Ö´ĞĞÃüÁî
+	// æ‰§è¡Œå‘½ä»¤
 	bool invoke(const std::string & command)
 	{
 		try {
@@ -221,7 +221,7 @@ private:
 		return true;
 	}
 
-	// Ö´ĞĞÄ£°å
+	// æ‰§è¡Œæ¨¡æ¿
 	template <typename __type>
 	bool __invoke_template(const std::string& command, __type& val)
 	{
@@ -236,7 +236,7 @@ private:
 		}
 
 		try {
-			// ºÏ³É²ÎÊı
+			// åˆæˆå‚æ•°
 			synthesis(pstmt_, val);
 			pstmt_->execute();
 		}
