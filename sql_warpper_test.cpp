@@ -5,7 +5,7 @@
 
 int main()
 {
-	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "407043", "game");
+	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "123456", "game");
 	bool ret_ = false;
 
 	// 创建
