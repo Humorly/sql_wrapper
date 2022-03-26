@@ -6,6 +6,7 @@
 #include <string>
 #include "log_writer.h"
 #include "sql_operate_ipml.h"
+#pragma comment (lib, "mysqlcppconn.lib")
 
 class sql_warpper : public sql_operate_ipml
 {
@@ -14,23 +15,14 @@ public:
 		const std::string & pwd, const std::string & db) 
 		: host_(host), user_(user), pwd_(pwd), db_(db)
 	{
-		try
-		{
-			// åˆ›å»ºè¿æ¥
-			driver_ = get_driver_instance();
-			// è¿æ¥æ•°æ®åº“
-			con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
-			// æŒ‡å‘æŒ‡å®šè·¯å¾„
-			con_->setSchema(db_.c_str());
-			// åˆ›å»ºæ‰§è¡Œå™¨
-			stmt_ = con_->createStatement();
-		}
-		catch (sql::SQLException & e)
-		{
-			std::string str_logger_("sql error is "
-				+ std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
-			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
-		}
+		/* Create a connection */
+		driver_ = get_driver_instance();
+		//con_ = driver_->connect("tcp://127.0.0.1:3306", "root", "407043");
+		con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
+		/* Connect to the MySQL test database */
+		con_->setSchema(db_.c_str());
+
+		stmt_ = con_->createStatement();
 	}
 
 	virtual ~sql_warpper() 
@@ -42,23 +34,165 @@ public:
 		delete con_;
 	}
 
-	// åˆ›å»º
+	// ´´½¨
 	bool create(const std::string & command) { return invoke(command); }
-	// å¢åŠ 
+	// Ôö¼Ó
 	bool insert(const std::string & command) { return invoke(command); }
-	// åˆ é™¤
+	// É¾³ı
 	bool remove(const std::string & command) { return invoke(command); }
-	// æ›´æ–° 
-	bool update(const std::string & command) { return invoke(command); }
-	// æŸ¥è¯¢
-	template <typename __set, typename __type, typename ... params>
-	bool select(const std::string & command, std::vector<std::tuple<__type, params...>> & dest, __set parm)
-	{
-		try 
-		{
-			pstmt_ = con_->prepareStatement(command.c_str());
-			res_ = pstmt_->executeQuery();
 
+	// É¾³ı
+	template <typename __type, typename ... params>
+	bool remove(const std::string& command, std::tuple<__type, params...> val)
+	{
+		pstmt_ = con_->prepareStatement(command);
+		// ºÏ³É²ÎÊı
+		synthesis(pstmt_, val);
+		pstmt_->execute();
+
+		delete pstmt_;
+		return true;
+	}
+
+	// ¸üĞÂ 
+	bool update(const std::string & command) { return invoke(command); }
+	// Ö´ĞĞ
+	bool execute(const std::string & command) { return invoke(command); }
+
+	// Ôö¼Ó ¡ª> insertÃüÁîÓÉcommandÖ¸³ö
+	template <typename __type, typename ... params>
+	bool insert(const std::string& command, std::tuple<__type, params...> val)
+	{
+		return __invoke_template(command, val);
+	}
+
+	// Ôö¼Ó ¡ª> ±íÃûÓÉ²ÎÊıtable_nameÖ¸³ö
+	template <typename __set, typename __type, typename ... params>
+	bool insert(const std::string& table_name, __set src, std::tuple<__type, params...> val)
+	{
+		// ºÏ³ÉÇ°×º
+		std::string command_ = "insert into " + table_name + " (";
+
+		// ºÏ³É×Ö¶Î
+		std::vector<std::string> parameter_;
+		parameter_ = expand<0>(src);
+
+		for (auto i = 0; i < parameter_.size(); i++)
+		{
+			command_ += parameter_[i];
+			if (i != parameter_.size() - 1)
+				command_ += ", ";
+		}
+		command_ += ") values (";
+
+		for (auto i = 0; i < parameter_.size(); i++)
+		{
+			command_ += "?";
+			if (i != parameter_.size() - 1)
+				command_ += ",";
+		}
+		command_ += ");";
+
+		return __invoke_template(command_, val);
+	}
+
+	// Ôö¼Ó ¡ª> ±íÃûÔÚsrcÖĞµÄµÚÒ»¸ö²ÎÊı
+	template <typename __table_type, typename ... params, typename __type>
+	bool insert(std::tuple<__table_type, params...> src, __type val)
+	{
+		// ºÏ³ÉÇ°×º
+		std::string command_ = "insert into " + std::get<0>(src) + " (";
+
+		// ºÏ³É×Ö¶Î
+		// ºÏ³É×Ö¶Î
+		std::vector<std::string> parameter_;
+		parameter_ = expand<1>(src);
+
+		for (auto i = 0; i < parameter_.size(); i++)
+		{
+			command_ += parameter_[i];
+			if (i != parameter_.size() - 1)
+				command_ += ", ";
+		}
+		command_ += ") values (";
+
+		for (auto i = 0; i < parameter_.size(); i++)
+		{
+			command_ += "?";
+			if (i != parameter_.size() - 1)
+				command_ += ",";
+		}
+		command_ += ");";
+
+		return __invoke_template(command_, val);
+	}
+
+	// ¸üĞÂ ¡ª> updateÃüÁîÓÉcommandÖ¸³ö
+	template <typename __type, typename ... params>
+	bool update(const std::string& command, std::tuple<__type, params...> val)
+	{
+		return __invoke_template(command, val);
+	}
+
+	// ¸üĞÂ 
+	template <typename __set, typename __type, typename ... params>
+	bool update(const std::string& table_name, __set src, std::tuple<__type, params...> val)
+	{
+		// ºÏ³ÉÇ°×º
+		std::string command_ = "update " + table_name + " set ";
+
+		// ºÏ³É×Ö¶Î
+		std::vector<std::string> parameter_;
+		parameter_ = expand<0>(src);
+
+		for (auto i = 0; i < parameter_.size() - 1; i++)
+		{
+			command_ += parameter_[i] + " = ?";
+			if (i != parameter_.size() - 2)
+				command_ += ", ";
+		}
+		command_ += " where " + parameter_[parameter_.size() - 1] + " = ?;";
+
+		return __invoke_template(command_, val);
+	}
+
+	// ¸üĞÂ
+	template <typename __table_type, typename ... params, typename __type>
+	bool update(std::tuple<__table_type, params...> src, __type val)
+	{
+		// ºÏ³ÉÇ°×º
+		std::string command_ = "update " + std::get<0>(src) + " set ";
+
+		// ºÏ³É×Ö¶Î
+		std::vector<std::string> parameter_;
+		parameter_ = expand<1>(src);
+
+		for (auto i = 0; i < parameter_.size() - 1; i++)
+		{
+			command_ += parameter_[i] + " = ?";
+			if (i != parameter_.size() - 2)
+				command_ += ", ";
+		}
+		command_ += " where " + parameter_[parameter_.size() - 1] + " = ?;";
+
+		return __invoke_template(command_, val);
+	}
+
+	// ²éÑ¯
+	template <typename __holder_type, typename __set, typename __type, typename ... params>
+	bool select(const std::string & command, 
+		__holder_type holder, __set parm, 
+		std::vector<std::tuple<__type, params...>> & dest)
+	{
+		try {
+			// ¹¹½¨ÃüÁî
+			pstmt_ = con_->prepareStatement(command);
+			// ºÏ³É²ÎÊı
+			synthesis(pstmt_, holder);
+
+			// Ö´ĞĞ²éÑ¯
+			res_ = pstmt_->executeQuery();
+			// ·´ÏòÌáÈ¡
 			res_->afterLast();
 			while (res_->previous())
 			{
@@ -67,9 +201,8 @@ public:
 			delete res_;
 			delete pstmt_;
 		}
-		catch (sql::SQLException &e) 
-		{
-			std::string str_logger_("sql error by select command -> code is " + 
+		catch (sql::SQLException &e) {
+			std::string str_logger_("sql error by create select -> code is " + 
 				std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
 			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
 			return false;
@@ -78,21 +211,51 @@ public:
 	}
 
 private:
-	// æ‰§è¡Œå‘½ä»¤
+	// Ö´ĞĞÃüÁî
 	bool invoke(const std::string & command)
 	{
-		try 
-		{
-			if (nullptr != stmt_)
-				stmt_->execute(command.c_str());
+		try {
+			//stmt_->execute("DROP TABLE IF EXISTS test");
+			stmt_->execute(command.c_str());
 		}
-		catch (sql::SQLException &e) 
-		{
-			std::string str_logger_("sql error by execute command -> code is "
+		catch (sql::SQLException &e) {
+			std::string str_logger_("sql error by update command -> code is "
 				+ std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
 			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
 			return false;
 		}
+		return true;
+	}
+
+	// Ö´ĞĞÄ£°å
+	template <typename __type>
+	bool __invoke_template(const std::string& command, __type& val)
+	{
+		try {
+			pstmt_ = con_->prepareStatement(command);
+		}
+		catch (sql::SQLException& e) {
+			std::string str_logger_("sql error by create select -> code is " +
+				std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
+			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
+			return false;
+		}
+
+		try {
+			// ºÏ³É²ÎÊı
+			synthesis(pstmt_, val);
+			pstmt_->execute();
+		}
+		catch (sql::SQLException& e) {
+			delete pstmt_;
+
+			std::string str_logger_("sql error by create select -> code is " +
+				std::to_string(e.getErrorCode()) + " & describe is " + std::string(e.what()));
+			wstd::log_writer::log_store(str_logger_, __FILE_LINE__);
+			return false;
+		}
+
+		delete pstmt_;
 		return true;
 	}
 

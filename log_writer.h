@@ -20,56 +20,38 @@ namespace wstd
 	// std::size_t to string
 	inline std::string to_string(std::size_t value);
 
-	class log_writer;
 	// log writer set
 	class log_writer
 	{
 	public:
 		log_writer() {}
-		virtual ~log_writer() 
-		{
-			if (!mutex_.try_lock())
-			{
-				mutex_.unlock();
-			}
-		}
-
-		// lock
-		void lock() 
-		{
-			mutex_.lock();
-		}
-
-		// unlock
-		void unlock()
-		{
-			mutex_.unlock();
-		}
+		virtual ~log_writer() {}
 
 		// write log
 		static log_writer & log_store(const std::string str, const char * file, int line)
 		{
 			static log_writer log_;
-			log_.lock();
+			std::lock_guard<std::mutex> lock_(log_.get_mutex());
 			log_.write(str, file, line);
-			log_.unlock();
 			return log_;
 		}
 
-	private:
-
 		// ´´½¨»¥³âËø
-		std::mutex mutex_;
+		std::mutex& get_mutex()
+		{
+			static std::mutex mutex_;
+			return mutex_;
+		}
 
+	private:
 		enum
 		{
 			invalid_ptr = 0,
 		};
 
 		// write log
-		void write(const std::string & str, const char * file = __FILE__, const int line = __LINE__) 
+		void write(const std::string & str, const char * file = __FILE__, int line = __LINE__) 
 		{
-
 			// get current time now
 			std::time_t time_ = std::time(reinterpret_cast<time_t *>(invalid_ptr));
 			tm * tm_ = std::localtime(&time_);
