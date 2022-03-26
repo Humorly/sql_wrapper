@@ -45,13 +45,7 @@ public:
 	template <typename __type, typename ... params>
 	bool remove(const std::string& command, std::tuple<__type, params...> val)
 	{
-		pstmt_ = con_->prepareStatement(command);
-		// 合成参数
-		synthesis(pstmt_, val);
-		pstmt_->execute();
-
-		delete pstmt_;
-		return true;
+		return __invoke_template(command, val);
 	}
 
 	// 更新 
