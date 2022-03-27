@@ -4,22 +4,60 @@
 测试代码:
 
 ```c++
-	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "123456", "gamed");
-	bool ret_ = false;
-	ret_ = sql_.create("create table test (id_ double, name_ varchar(64), password_ varchar(64)); ");
-	ret_ = sql_.insert("insert into test values(5.12056683, \"humorly\", \"chen123\");");
-	ret_ = sql_.insert("insert into test values(5.12056684, \"humorly\", \"chen123\");");
-	ret_ = sql_.insert("insert into test values(5.12056685, \"humorly\", \"chen123\");");
-	ret_ = sql_.remove("delete from test  where id_ = 5.12056684;");
-	ret_ = sql_.update("update game.test set id_ = 5.55555555 where id_ = 5.12056683;");
+#include "sql_warpper.h"
 
-	// 待搜索的字段信息
-	std::tuple<std::string, std::string, std::string> params_("id_", "name_", "password_");
+int main()
+{
+	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "123456", "game");
+	bool ret_ = false;
+
+	// 创建
+	ret_ = sql_.create("create table test (id_ double, name_ varchar(64), password_ varchar(64)); ");
+
+	// 添加
+	ret_ = sql_.insert("insert into test (id_, name_, password_) values (0.1, '0.2', '0.3');"),
+	// 添加 —> 带参数
+	ret_ = sql_.insert("insert into test (id_, name_, password_) values (?, ?, ?);",
+		std::tuple<double, std::string, std::string>(0.11118, "0.2", "0.2"));
+	// 添加 —> 带参数
+	ret_ = sql_.insert("insert into test (id_, name_, password_) values (?, ?, ?);",
+		std::tuple<double, std::string, std::string>(0.8, "0.2", "0.2"));
+
+	// 删除
+	ret_ = sql_.remove("delete from test where id_ = '0.3';");
+	// 删除 —> 带参数
+	ret_ = sql_.remove("delete from test where id_ = ?;", std::tuple<std::string>("0.11118"));
+
+	// 更新
+	ret_ = sql_.update("update test set id_ = 0.1, name_ = 'test' where password_ = 0.1;"),
+	// 更新 —> 带参数
+	ret_ = sql_.update("update test set id_ = ?, name_ = ? where password_ = ?;",
+		std::tuple<double, std::string, std::string>(0.2, "humorly", "0.2"));
+
 	std::vector<std::tuple<double, std::string, std::string>> user_content_;
-	ret_ = sql_.select("SELECT * FROM test", user_content_, params_);
+	// 查询
+	ret_ = sql_.select("select * from test;",
+		std::tuple <>(),
+		std::tuple<std::string, std::string, std::string>("id_", "name_", "password_"),
+		user_content_);
 
 	std::cout << "content:" << std::endl;
-	for (auto & val : user_content_)
+	for (auto& val : user_content_)
+	{
+		std::cout << "id_ = " << std::get<0>(val) << ", ";
+		std::cout << "name_ = " << std::get<1>(val) << ", ";
+		std::cout << "password_ = " << std::get<2>(val) << std::endl;
+	}
+
+	// 查询 —> 带参数
+	user_content_.clear();
+	ret_ = sql_.select("select id_, name_, password_ from test where password_ = ?;",
+		std::tuple <std::string>("0.2"),
+		std::tuple<std::string, std::string, std::string>("id_", "name_", "password_"),
+		user_content_);
+
+	std::cout << "content:" << std::endl;
+	for (auto& val : user_content_)
 	{
 		std::cout << "id_ = " << std::get<0>(val) << ", ";
 		std::cout << "name_ = " << std::get<1>(val) << ", ";
@@ -27,5 +65,6 @@
 	}
 
 	return 0;
+}
   
   ```
