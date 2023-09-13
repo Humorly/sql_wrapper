@@ -1,5 +1,5 @@
 # sql_warpper
-封装mysql官方的cppconn c++接口的更高级封装，使增删改查变得更加modern c++。
+封装mysql官方的cppconn c++接口的更高级封装(需要自行下载mysql cppconn)，使增删改查变得更加modern c++。
 
 测试代码:
 
