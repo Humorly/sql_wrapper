@@ -1,14 +1,14 @@
-# sql_warpper
+# sql_wrapper
 封装mysql官方的cppconn c++接口的更高级封装(需要自行下载mysql cppconn)，使增删改查变得更加modern c++。
 
 测试代码:
 
 ```c++
-#include "sql_warpper.h"
+#include "sql_wrapper.h"
 
 int main()
 {
-	sql_warpper sql_("tcp://127.0.0.1:3306", "root", "123456", "game");
+	sql_wrapper sql_("tcp://127.0.0.1:3306", "root", "123456", "game");
 	bool ret_ = false;
 
 	// 创建
