@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "cz-conventional-changelog": "^3.3.0",
+    "g-cz-emoji": "^1.0.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "g-cz-emoji"
+    }
+  }
+}

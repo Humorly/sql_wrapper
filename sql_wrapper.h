@@ -8,16 +8,15 @@
 #include "sql_operate_ipml.h"
 #pragma comment (lib, "mysqlcppconn.lib")
 
-class sql_warpper : public sql_operate_ipml
+class sql_wrapper : public sql_operate_ipml
 {
 public:
-	sql_warpper(const std::string & host, const std::string & user, 
+	sql_wrapper(const std::string & host, const std::string & user, 
 		const std::string & pwd, const std::string & db) 
 		: host_(host), user_(user), pwd_(pwd), db_(db)
 	{
 		/* Create a connection */
 		driver_ = get_driver_instance();
-		//con_ = driver_->connect("tcp://127.0.0.1:3306", "root", "123456");
 		con_ = driver_->connect(host_.c_str(), user_.c_str(), pwd_.c_str());
 		/* Connect to the MySQL test database */
 		con_->setSchema(db_.c_str());
@@ -25,7 +24,7 @@ public:
 		stmt_ = con_->createStatement();
 	}
 
-	virtual ~sql_warpper() 
+	virtual ~sql_wrapper() 
 	{
 		stmt_->close();
 		con_->close();
