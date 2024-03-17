@@ -1,0 +1,3 @@
+D:/cheaz-github/sql_warpper/build/CMakeFiles/sql_wrapper.dir
+D:/cheaz-github/sql_warpper/build/CMakeFiles/ALL_BUILD.dir
+D:/cheaz-github/sql_warpper/build/CMakeFiles/ZERO_CHECK.dir

@@ -29,7 +29,7 @@ protected:
 		return dest;
 	}
 
-	// Õ¹¿ª²ÎÊý
+	// Õ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	template<integer64_type N, integer64_type M>
 	struct get_class
 	{
@@ -37,25 +37,25 @@ protected:
 		inline static void get(__dest & dest, __src * src, __set parm)
 		{
 			constexpr integer64_type index_ = N + 1;
-			// ¸³ÖµÔªËØN²¢µÝ¹éÕ¹¿ª
+			// ï¿½ï¿½ÖµÔªï¿½ï¿½Nï¿½ï¿½ï¿½Ý¹ï¿½Õ¹ï¿½ï¿½
 			std::get<N>(dest) = get_value_type<T, __src, const char *>::template get_value(src, std::get<N>(parm).c_str());
 			get_class<index_, M>::template get<__dest, __src, __set, params...>(dest, src, parm);
 		}
 	};
 
-	// µÝ¹éµ½Ä©ÔªËØ
+	// ï¿½Ý¹éµ½Ä©Ôªï¿½ï¿½
 	template<integer64_type M>
 	struct get_class<M, M>
 	{
 		template <typename __dest, typename __src, typename __set, typename T>
 		inline static void get(__dest & dest, __src * src, __set parm)
 		{
-			// Ä©ÔªËØ¸³Öµ
+			// Ä©Ôªï¿½Ø¸ï¿½Öµ
 			std::get<M>(dest) = get_value_type<T, __src, const char *>::template get_value(src, std::get<M>(parm).c_str());
 		}
 	};
 
-	// ·ÖÀëÐÍ±ðÆ«ÌØ»¯
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Í±ï¿½Æ«ï¿½Ø»ï¿½
 	template<typename __value_type, typename __dest_type, typename __parm>
 	struct get_value_type
 	{
@@ -102,6 +102,16 @@ protected:
 		}
 	};
 
+	// long unsigned int
+	template<typename __dest_type, typename __parm>
+	struct get_value_type<long unsigned int, __dest_type, __parm>
+	{
+		inline static auto get_value(__dest_type* val, __parm parm) -> decltype(val->getUInt64(parm))
+		{
+			return val->getUInt64(parm);
+		}
+	};
+
 	// bigint
 	template<typename __dest_type, typename __parm>
 	struct get_value_type<integer64_type, __dest_type, __parm>
@@ -132,7 +142,7 @@ protected:
 		}
 	};
 
-	// ºÏ³É²ÎÊý
+	// ï¿½Ï³É²ï¿½ï¿½ï¿½
 	template <typename __value_type, typename ... params>
 	void synthesis(__value_type* statement, std::tuple<params...>& node)
 	{
@@ -145,33 +155,33 @@ protected:
 	{
 	}
 
-	// Õ¹¿ª²ÎÊý
+	// Õ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	template<integer64_type N, integer64_type M>
 	struct make_class
 	{
 		template <typename __value_type, typename __set, typename __part_type, typename ... params>
 		inline static void make(__value_type* statement, __set& node)
 		{
-			// ¸³ÖµÔªËØN²¢µÝ¹éÕ¹¿ª
+			// ï¿½ï¿½ÖµÔªï¿½ï¿½Nï¿½ï¿½ï¿½Ý¹ï¿½Õ¹ï¿½ï¿½
 			constexpr integer64_type index_ = N + 1;
 			make_value_type<__part_type, __value_type, integer64_type, __part_type>::template set_value(statement, N, std::get<N>(node));
 			make_class<index_, M>::template make<__value_type, __set, params...>(statement, node);
 		}
 	};
 
-	// µÝ¹éµ½Ä©ÔªËØ
+	// ï¿½Ý¹éµ½Ä©Ôªï¿½ï¿½
 	template<integer64_type M>
 	struct make_class<M, M>
 	{
 		template <typename __value_type, typename __set, typename __part_type, typename ... params>
 		inline static void make(__value_type* statement, __set& node)
 		{
-			// Ä©ÔªËØ¸³Öµ
+			// Ä©Ôªï¿½Ø¸ï¿½Öµ
 			make_value_type<__part_type, __value_type, integer64_type, __part_type>::template set_value(statement, M, std::get<M>(node));
 		}
 	};
 
-	// ºÏ³ÉÐÍ±ðÆ«ÌØ»¯
+	// ï¿½Ï³ï¿½ï¿½Í±ï¿½Æ«ï¿½Ø»ï¿½
 	template<typename __part_type, typename __value_type, typename __index_type, typename __parm>
 	struct make_value_type
 	{
@@ -228,6 +238,16 @@ protected:
 		}
 	};
 
+	// long unsigned int
+	template<typename __value_type, typename __index_type, typename __parm>
+	struct make_value_type<long unsigned int, __value_type, __index_type, __parm>
+	{
+		inline static void set_value(__value_type* statement, __index_type N, __parm parm)
+		{
+			return statement->setUInt64(N + 1, parm);
+		}
+	};
+
 	// double
 	template<typename __value_type, typename __index_type, typename __parm>
 	struct make_value_type<double, __value_type, __index_type, __parm>
@@ -248,19 +268,19 @@ protected:
 		}
 	};
 
-	// Õ¹¿ªtuple
+	// Õ¹ï¿½ï¿½tuple
 	template <integer64_type N, typename T, typename ... params>
 	inline static std::vector<std::string> expand(std::tuple<T, params...>& parm)
 	{
 		std::vector<std::string> dest_;
 		constexpr int size_ = sizeof...(params);
-		// Õ¹¿ªtuple
+		// Õ¹ï¿½ï¿½tuple
 		get_tuple<N, size_>::template get<std::tuple<T, params...>>(dest_, parm);
 
 		return dest_;
 	}
 
-	// Õ¹¿ª²ÎÊý
+	// Õ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	template<integer64_type N, integer64_type M>
 	struct get_tuple
 	{
@@ -268,20 +288,20 @@ protected:
 		inline static void get(std::vector<std::string>& dest, __set& parm)
 		{
 			constexpr integer64_type index_ = N + 1;
-			// ¸³ÖµÔªËØN²¢µÝ¹éÕ¹¿ª
+			// ï¿½ï¿½ÖµÔªï¿½ï¿½Nï¿½ï¿½ï¿½Ý¹ï¿½Õ¹ï¿½ï¿½
 			dest.push_back(std::get<N>(parm));
 			get_tuple<index_, M>::template get<__set>(dest, parm);
 		}
 	};
 
-	// µÝ¹éµ½Ä©ÔªËØ
+	// ï¿½Ý¹éµ½Ä©Ôªï¿½ï¿½
 	template<integer64_type M>
 	struct get_tuple<M, M>
 	{
 		template <typename __set>
 		inline static void get(std::vector<std::string>& dest, __set& parm)
 		{
-			// Ä©ÔªËØ¸³Öµ
+			// Ä©Ôªï¿½Ø¸ï¿½Öµ
 			dest.push_back(std::get<M>(parm));
 		}
 	};
